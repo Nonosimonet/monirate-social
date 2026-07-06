@@ -2,8 +2,8 @@ name: Publish to Instagram
 
 on:
   schedule:
-    # Tous les jours à 17h05 UTC (19h05 Paris l'été) — publie le prochain post échu de la file
-    - cron: "5 17 * * *"
+    # Tous les 2 jours à 17h05 UTC (19h05 Paris l'été) — publie le prochain post échu de la file
+    - cron: "5 17 */2 * *"
   workflow_dispatch: {}
 
 permissions:
