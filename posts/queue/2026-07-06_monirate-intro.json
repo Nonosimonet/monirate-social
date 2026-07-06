@@ -1,0 +1,7 @@
+{
+  "media": "media/reels/monirate_reel_v2_en.mp4",
+  "caption_file": "captions/2026-07-06_monirate-intro.txt",
+  "type": "REELS",
+  "publish_at": "2099-01-01",
+  "_note": "publish_at mis en 2099 = en pause. Ce premier post sera publié À LA MAIN pour pouvoir ajouter une musique Instagram. Passe la date à aujourd'hui si tu veux le publier via l'API quand même."
+}

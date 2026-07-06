@@ -1,0 +1,30 @@
+name: Refresh Instagram token
+
+on:
+  schedule:
+    # Le 1er et le 15 de chaque mois — le token long-lived expire au bout de 60 jours
+    - cron: "0 6 1,15 * *"
+  workflow_dispatch: {}
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Refresh token and update secret
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          OUT=$(node scripts/refresh_token.mjs)
+          echo "$OUT" | grep -v NEW_TOKEN=
+          NEW=$(echo "$OUT" | grep NEW_TOKEN= | cut -d= -f2)
+          if [ -n "$NEW" ]; then
+            gh secret set IG_ACCESS_TOKEN --repo "${{ github.repository }}" --body "$NEW"
+            echo "Secret IG_ACCESS_TOKEN mis à jour."
+          fi

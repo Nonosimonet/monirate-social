@@ -1,0 +1,38 @@
+name: Publish to Instagram
+
+on:
+  schedule:
+    # Tous les jours à 17h05 UTC (19h05 Paris l'été) — publie le prochain post échu de la file
+    - cron: "5 17 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: instagram-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Publish next due post
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          MEDIA_BASE_URL: https://raw.githubusercontent.com/${{ github.repository }}/main
+        run: node scripts/publish.mjs
+
+      - name: Commit queue changes
+        run: |
+          git config user.name "aflow-bot"
+          git config user.email "actions@github.com"
+          git add posts/
+          git diff --cached --quiet || git commit -m "chore: move published post out of queue"
+          git push
