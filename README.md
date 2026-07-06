@@ -30,11 +30,12 @@ posts/queue/*.json  ──(cron 17h05 UTC)──►  Instagram Reel/Post  ──
 
 | Secret | Contenu |
 |---|---|
-| `IG_ACCESS_TOKEN` | Token long-lived de l'app Meta « Aflow Publisher » (permissions `instagram_business_basic`, `instagram_business_content_publish`) |
+| `IG_ACCESS_TOKEN` | Token long-lived de l'app Meta « MoniRate-Bot » (permissions `instagram_business_basic`, `instagram_business_content_publish`) |
 
-
-Le token Instagram expire après 60 jours : le workflow `refresh-token.yml` le rafraîchit
-les 1er et 15 de chaque mois.
+⏰ **Le token expire après ~60 jours** (rafraîchissement manuel) : dashboard Meta →
+app **MoniRate-Bot** → Instagram → Configuration de l'API → « Générer un token »,
+puis recoller la nouvelle valeur dans le secret `IG_ACCESS_TOKEN`.
+Prochain renouvellement à prévoir : **début septembre 2026**.
 
 ## Limites connues de l'API
 
