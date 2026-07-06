@@ -31,7 +31,7 @@ posts/queue/*.json  ──(cron 17h05 UTC)──►  Instagram Reel/Post  ──
 | Secret | Contenu |
 |---|---|
 | `IG_ACCESS_TOKEN` | Token long-lived de l'app Meta « Aflow Publisher » (permissions `instagram_business_basic`, `instagram_business_content_publish`) |
-| `GH_PAT` | Personal Access Token GitHub (scope `repo`) — sert au workflow de refresh à mettre à jour `IG_ACCESS_TOKEN` |
+
 
 Le token Instagram expire après 60 jours : le workflow `refresh-token.yml` le rafraîchit
 les 1er et 15 de chaque mois.
