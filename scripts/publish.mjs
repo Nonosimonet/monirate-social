@@ -67,10 +67,12 @@ async function main() {
 
   // 2. Attendre que Meta ait téléchargé/transcodé la vidéo
   for (let i = 0; i < 30; i++) {
-    const st = await api(container.id, { fields: "status_code" });
+    const st = await api(container.id, { fields: "status_code,status" });
     console.log(`  statut: ${st.status_code}`);
     if (st.status_code === "FINISHED") break;
-    if (st.status_code === "ERROR") throw new Error("Transcodage du média en erreur.");
+    if (st.status_code === "ERROR") {
+      throw new Error(`Transcodage du média en erreur — détail: ${st.status || "(aucun)"}`);
+    }
     await sleep(10_000);
   }
 
