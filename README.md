@@ -46,6 +46,6 @@ les 1er et 15 de chaque mois.
 ## Test local
 
 ```bash
-IG_ACCESS_TOKEN=xxx MEDIA_BASE_URL=https://raw.githubusercontent.com/Nonosimonet/aflow-social/main \
+IG_ACCESS_TOKEN=xxx MEDIA_BASE_URL=https://raw.githubusercontent.com/Nonosimonet/monirate-social/main \
   node scripts/publish.mjs
 ```
