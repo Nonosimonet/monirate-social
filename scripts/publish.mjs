@@ -11,7 +11,7 @@
 // Les fichiers sont traités par ordre alphabétique (préfixe la date dans le nom pour ordonner).
 // Après publication, le fichier est déplacé vers posts/published/ (le workflow committe).
 
-import { readdir, readFile, rename } from "node:fs/promises";
+import { readdir, readFile, rename, mkdir } from "node:fs/promises";
 import path from "node:path";
 
 const GRAPH = "https://graph.instagram.com/v23.0";
@@ -80,6 +80,7 @@ async function main() {
   const pub = await api(`${me.user_id}/media_publish`, { creation_id: container.id }, "POST");
   console.log(`✅ Publié ! media_id=${pub.id}`);
 
+  await mkdir(DONE, { recursive: true });
   await rename(path.join(QUEUE, file), path.join(DONE, file));
   console.log(`${file} → posts/published/`);
 }
