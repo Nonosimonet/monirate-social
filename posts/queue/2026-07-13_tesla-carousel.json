@@ -1,0 +1,12 @@
+{
+  "type": "CAROUSEL",
+  "images": [
+    "media/carousel/2026-07-13_tesla/1.png",
+    "media/carousel/2026-07-13_tesla/2.png",
+    "media/carousel/2026-07-13_tesla/3.png",
+    "media/carousel/2026-07-13_tesla/4.png",
+    "media/carousel/2026-07-13_tesla/5.png"
+  ],
+  "caption_file": "captions/2026-07-13_tesla-carousel.txt",
+  "publish_at": "2099-01-01"
+}
