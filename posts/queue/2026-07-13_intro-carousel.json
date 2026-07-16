@@ -1,0 +1,15 @@
+{
+  "type": "CAROUSEL",
+  "images": [
+    "media/carousel/2026-07-13_intro/1.png",
+    "media/carousel/2026-07-13_intro/2.png",
+    "media/carousel/2026-07-13_intro/3.png",
+    "media/carousel/2026-07-13_intro/4.png",
+    "media/carousel/2026-07-13_intro/5.png",
+    "media/carousel/2026-07-13_intro/6.png",
+    "media/carousel/2026-07-13_intro/7.png",
+    "media/carousel/2026-07-13_intro/8.png"
+  ],
+  "caption_file": "captions/2026-07-13_intro-carousel.txt",
+  "publish_at": "2026-07-13"
+}
