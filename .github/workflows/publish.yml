@@ -2,8 +2,10 @@ name: Publish to Instagram
 
 on:
   schedule:
-    # Tous les 2 jours à 17h05 UTC (19h05 Paris l'été) — publie le prochain post échu de la file
-    - cron: "5 17 */2 * *"
+    # Tous les jours à 17h05 UTC (19h05 Paris l'été). La cadence réelle est
+    # imposée par publish.mjs (MIN_DAYS_BETWEEN_POSTS, 3 jours par défaut) :
+    # un cron "*/N" repart au 1er du mois et collerait deux posts après le 31.
+    - cron: "5 17 * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -27,6 +29,7 @@ jobs:
         env:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           MEDIA_BASE_URL: https://raw.githubusercontent.com/${{ github.repository }}/main
+          MIN_DAYS_BETWEEN_POSTS: "3"
         run: node scripts/publish.mjs
 
       - name: Commit queue changes

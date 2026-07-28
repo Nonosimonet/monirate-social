@@ -15,7 +15,7 @@
 // Les fichiers sont traités par ordre alphabétique (préfixe la date dans le nom pour ordonner).
 // Après publication, le fichier est déplacé vers posts/published/ (le workflow committe).
 
-import { readdir, readFile, rename, mkdir } from "node:fs/promises";
+import { readdir, readFile, writeFile, rename, mkdir } from "node:fs/promises";
 import path from "node:path";
 
 const GRAPH = "https://graph.instagram.com/v23.0";
@@ -23,6 +23,13 @@ const TOKEN = process.env.IG_ACCESS_TOKEN;
 const BASE = (process.env.MEDIA_BASE_URL || "").replace(/\/$/, "");
 const QUEUE = "posts/queue";
 const DONE = "posts/published";
+const STATE = "posts/last_published.json";
+
+// Cadence minimale entre deux posts. Le cron tourne tous les jours ; c'est ce
+// garde-fou qui espace réellement les publications, même si plusieurs posts de
+// la file sont échus. (Un cron "*/3" ne marcherait pas : le jour du mois repart
+// à 1, donc on posterait deux jours de suite après le 31.)
+const MIN_DAYS = Number(process.env.MIN_DAYS_BETWEEN_POSTS || 3);
 
 if (!TOKEN) { console.error("IG_ACCESS_TOKEN manquant"); process.exit(1); }
 if (!BASE) { console.error("MEDIA_BASE_URL manquant"); process.exit(1); }
@@ -53,6 +60,17 @@ async function waitReady(id, tries = 30, delay = 10_000) {
     await sleep(delay);
   }
   throw new Error(`Timeout: conteneur ${id} jamais FINISHED`);
+}
+
+// Jours écoulés depuis la dernière publication réussie. Infinity si aucun
+// historique (première publication après l'ajout du garde-fou).
+async function daysSinceLastPost() {
+  try {
+    const state = JSON.parse(await readFile(STATE, "utf8"));
+    return (Date.now() - new Date(state.published_at).getTime()) / 86_400_000;
+  } catch {
+    return Infinity;
+  }
 }
 
 async function nextDuePost() {
@@ -103,6 +121,14 @@ async function buildContainer(igId, post, caption) {
 }
 
 async function main() {
+  // Tolérance de 2h : le cron ne tombe jamais à la seconde près, sans elle un
+  // run à J+3 pile pourrait être refusé pour quelques minutes.
+  const gap = await daysSinceLastPost();
+  if (gap < MIN_DAYS - 2 / 24) {
+    console.log(`Dernier post il y a ${gap.toFixed(1)} j — cadence minimale ${MIN_DAYS} j. Rien à publier.`);
+    return;
+  }
+
   const due = await nextDuePost();
   if (!due) { console.log("File vide ou rien d'échu — rien à publier."); return; }
 
@@ -127,6 +153,12 @@ async function main() {
     }
   }
   console.log(`✅ Publié ! media_id=${pub.id}`);
+
+  await writeFile(
+    STATE,
+    JSON.stringify({ published_at: new Date().toISOString(), file, media_id: pub.id }, null, 2) + "\n",
+    "utf8",
+  );
 
   await mkdir(DONE, { recursive: true });
   await rename(path.join(QUEUE, file), path.join(DONE, file));

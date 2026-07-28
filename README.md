@@ -22,9 +22,24 @@ posts/queue/*.json  ──(cron 17h05 UTC)──►  Instagram Reel/Post  ──
      "publish_at": "2026-07-10"
    }
    ```
-3. Commit + push → le workflow publie le prochain post « échu » chaque jour à 17h05 UTC
-   (un seul post par jour, ordre alphabétique des fichiers → préfixer par la date).
+3. Commit + push → le workflow tourne chaque jour à 17h05 UTC et publie le prochain
+   post « échu » (ordre alphabétique des fichiers → préfixer par la date).
 4. Lancement manuel possible : onglet **Actions → Publish to Instagram → Run workflow**.
+
+### Cadence : 1 post tous les 3 jours
+
+Le cron tourne **tous les jours**, mais `publish.mjs` refuse de publier si le
+dernier post date de moins de `MIN_DAYS_BETWEEN_POSTS` jours (**3** par défaut,
+réglé dans `publish.yml`). La date du dernier envoi réussi est stockée dans
+`posts/last_published.json`, committée par le workflow.
+
+Ce garde-fou tient même si plusieurs posts de la file sont échus en même temps :
+ils partiront un par un, espacés de 3 jours. Un `cron: "5 17 */3 * *"` ne suffirait
+pas — le champ jour-du-mois repart à 1 à chaque mois, donc deux posts se
+retrouveraient collés après le 31.
+
+Pour forcer une publication hors cadence : lancer le workflow à la main après
+avoir supprimé `posts/last_published.json`.
 
 ## Secrets à configurer (Settings → Secrets → Actions)
 
