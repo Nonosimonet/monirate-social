@@ -2,10 +2,17 @@ name: Publish to Instagram
 
 on:
   schedule:
-    # Tous les jours à 17h05 UTC (19h05 Paris l'été). La cadence réelle est
-    # imposée par publish.mjs (MIN_DAYS_BETWEEN_POSTS, 3 jours par défaut) :
-    # un cron "*/N" repart au 1er du mois et collerait deux posts après le 31.
-    - cron: "5 17 * * *"
+    # Vise une publication vers 16h30 UTC : c'est le créneau qui recouvre le
+    # plus d'audiences à la fois (9h Los Angeles, 12h New York, 18h Paris,
+    # 21h30 New Delhi). On part 40 min plus tôt car GitHub Actions ne garantit
+    # pas l'heure des workflows planifiés (file d'attente, pire aux minutes
+    # rondes — d'où :47) et Meta doit encore encoder la vidéo.
+    # ATTENTION : le cron est en UTC et ne suit pas l'heure d'été. Fin octobre,
+    # tout se décale d'une heure plus tôt en heure de Paris.
+    # La cadence réelle est imposée par publish.mjs (MIN_DAYS_BETWEEN_POSTS,
+    # 3 jours par défaut) : un cron "*/N" repart au 1er du mois et collerait
+    # deux posts après le 31.
+    - cron: "47 15 * * *"
   workflow_dispatch: {}
 
 permissions:
