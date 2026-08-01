@@ -25,10 +25,11 @@ const QUEUE = "posts/queue";
 const DONE = "posts/published";
 const STATE = "posts/last_published.json";
 
-// Cadence minimale entre deux posts. Le cron tourne tous les jours ; c'est ce
-// garde-fou qui espace réellement les publications, même si plusieurs posts de
-// la file sont échus. (Un cron "*/3" ne marcherait pas : le jour du mois repart
-// à 1, donc on posterait deux jours de suite après le 31.)
+// Cadence minimale entre deux posts, en jours de calendrier. Le cron tourne
+// tous les jours ; c'est ce garde-fou qui espace réellement les publications,
+// même si plusieurs posts de la file sont échus. (Un cron "*/3" ne marcherait
+// pas : le jour du mois repart à 1, donc on posterait deux jours de suite
+// après le 31.)
 const MIN_DAYS = Number(process.env.MIN_DAYS_BETWEEN_POSTS || 3);
 
 if (!TOKEN) { console.error("IG_ACCESS_TOKEN manquant"); process.exit(1); }
@@ -62,12 +63,21 @@ async function waitReady(id, tries = 30, delay = 10_000) {
   throw new Error(`Timeout: conteneur ${id} jamais FINISHED`);
 }
 
-// Jours écoulés depuis la dernière publication réussie. Infinity si aucun
-// historique (première publication après l'ajout du garde-fou).
+// Jours de CALENDRIER écoulés depuis la dernière publication réussie. Infinity
+// si aucun historique (première publication après l'ajout du garde-fou).
+//
+// On compare des dates et non des horodatages : l'objectif est de publier à
+// l'heure qui touche le plus de monde, pas d'attendre 72 h à la seconde près.
+// Comparer des timestamps créait un cliquet — chaque publication fixait l'heure
+// plancher de la suivante, et comme les workflows planifiés arrivent toujours
+// en retard, l'heure de publication ne pouvait que dériver vers le tard.
+// Avancer volontairement le cron sautait alors une journée entière.
 async function daysSinceLastPost() {
   try {
     const state = JSON.parse(await readFile(STATE, "utf8"));
-    return (Date.now() - new Date(state.published_at).getTime()) / 86_400_000;
+    const last = new Date(state.published_at).toISOString().slice(0, 10);
+    const today = new Date().toISOString().slice(0, 10);
+    return Math.round((Date.parse(`${today}T00:00:00Z`) - Date.parse(`${last}T00:00:00Z`)) / 86_400_000);
   } catch {
     return Infinity;
   }
@@ -121,11 +131,9 @@ async function buildContainer(igId, post, caption) {
 }
 
 async function main() {
-  // Tolérance de 2h : le cron ne tombe jamais à la seconde près, sans elle un
-  // run à J+3 pile pourrait être refusé pour quelques minutes.
   const gap = await daysSinceLastPost();
-  if (gap < MIN_DAYS - 2 / 24) {
-    console.log(`Dernier post il y a ${gap.toFixed(1)} j — cadence minimale ${MIN_DAYS} j. Rien à publier.`);
+  if (gap < MIN_DAYS) {
+    console.log(`Dernier post il y a ${gap} j — cadence minimale ${MIN_DAYS} j. Rien à publier.`);
     return;
   }
 

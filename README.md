@@ -29,9 +29,16 @@ posts/queue/*.json  ──(cron 17h05 UTC)──►  Instagram Reel/Post  ──
 ### Cadence : 1 post tous les 3 jours
 
 Le cron tourne **tous les jours**, mais `publish.mjs` refuse de publier si le
-dernier post date de moins de `MIN_DAYS_BETWEEN_POSTS` jours (**3** par défaut,
-réglé dans `publish.yml`). La date du dernier envoi réussi est stockée dans
-`posts/last_published.json`, committée par le workflow.
+dernier post date de moins de `MIN_DAYS_BETWEEN_POSTS` **jours de calendrier**
+(**3** par défaut, réglé dans `publish.yml`). La date du dernier envoi réussi
+est stockée dans `posts/last_published.json`, committée par le workflow.
+
+Le comptage se fait sur les dates, pas sur les horodatages : le but est de
+publier à l'heure qui touche le plus de monde, pas d'attendre 72 h à la seconde
+près. Comparer des timestamps créait un cliquet — chaque publication fixait
+l'heure plancher de la suivante, et comme les workflows planifiés arrivent
+toujours en retard, l'heure ne pouvait que dériver vers le tard. Avancer le cron
+faisait alors sauter une journée entière.
 
 Ce garde-fou tient même si plusieurs posts de la file sont échus en même temps :
 ils partiront un par un, espacés de 3 jours. Un `cron: "5 17 */3 * *"` ne suffirait
